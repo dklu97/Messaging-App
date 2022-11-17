@@ -1,30 +1,23 @@
 import socket
-import sys
-import time
 
-socket_server = socket.socket()
-server_host = socket.gethostname()
-ip = socket.gethostbyname(server_host)
-port = 8080
-
-
-#connecting to the server
-print("this is your ip adress: ", ip)
-server_host = input('Enter friends IP adress')
+HEADER = 64
+PORT = 5050
+FORMAT = 'utf-8'
+DISCONNECT_MESSAGE = "DISCONNECT"
+SERVER = socket.gethostbyname(socket.gethostname())
+ADDR = (SERVER, PORT)
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(ADDR)
 
 
-socket_server.connect(server_host, port)
+def send(msg):
+    message = msg.encode(FORMAT)
+    message_length = len(message)
+    send_length = str(message_length).encode(FORMAT)
+    send_length += b' ' * (HEADER - len(send_length))
+    client.send(send_length)
+    client.send(message)
 
 
-#receive messages/packages from the server
-socket_server.send(name.encode)
-server_name = socket_server.recv(1024)
-server_name = server_name.decode()
-
-
-print(server_name, 'has joined...')
-while True:
-    message = socket_server.recv(1024).decode()
-    print(server_name, ':', message)
-    message = input('Me :')
-    socket_server.send(message.encode())
+send("Hello World!")
+input()

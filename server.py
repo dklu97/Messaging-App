@@ -1,42 +1,41 @@
 import socket
-import sys
-import time
+import threading
 
-new_socket = socket()
-host_name = socket.gethostname()
-s_ip = socket.gethostbyname(hostname)
-port =  8080
+HEADER = 64
+PORT = 5050
+SERVER = socket.gethostbyname(socket.gethostname())
+ADDR = (SERVER, PORT)
+FORMAT = 'utf-8'
+DISCONNECT_MESSAGE = "DISCONNECT"
 
-#binding the host
-new_socket.bind((host_name, port))
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server.bind(ADDR)
 
-print("binding successful")
-print("This is your IP adress", s_ip)
+def handle_client(conn, addr):
+    print(f"[NEW CONNECTION] {addr} connected.")
 
-#listening for connections
-name = input("Enter name:")
-new_socket.listen(1)
-
-
-#accepting an incoming connection
-
-# client will return a value pair
-#conn = new socket object
-#adress
-conn, add = new_socket.accept()
-print("received connection from",add [0])
-
-#storing incoming connection data
-client = (conn.recv(1024)).decode()
-print(client + 'has connected.')
-conn.send(name.enconde())
+    connected = True
+    while connected:
+        message_length = conn.recv(HEADER).decode(FORMAT)
+        if message_length:
+            message_length = int(message_length)
+            message = conn.recv(message_length).decode(FORMAT)
+            if message == DISCONNECT_MESSAGE:
+                connected = False
+                print(f"[{addr}] {message}")
+    conn.close()
 
 
-while True:
-    message = input("Me: ")
-    conn.send(message.encode())
-    message = conv.recv(1024)
-    message = message.decode()
-    print(client, ':', message)
+def start():
+    server.listen()
+    print("Server is listening")
+    while True:
+        conn, addr = server.accept()
+        thread = threading.Thread(target=handle_client, args=(conn, addr))
+        thread.start()
+        print(f"[NEW CONNECTION] {addr} connected.")
+        print(f"[ACTIVE CONNECTIONS] {threading.activeCount()-1}")
 
-    
+
+print("[STARTING] starting the server")
+start()
